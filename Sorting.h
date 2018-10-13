@@ -149,7 +149,7 @@ void merge(int arr[], int first, int last) {
   int i = first;                 //Left Subarray Start
   int j = mid + 1;               //Right Subarray Start
   int k = 0;                     //Index Counter
-  int temp[last - first + 1];    //Temporary Array
+  int* temp= new int[last - first + 1];    //Temporary Array
   //Merge the Two Subarrays into Temp
   while(i <= mid && j <= last) {
     if(arr[i] < arr[j]) {
@@ -424,4 +424,9 @@ void heap_sort(int arr[], int size){
   }
 }
 
+void all_sorts(int arr[], int size){
+  cout << "This feature is unavailable at this time.\n"
+       << "In the meantime, enjoy this ASCII wizard on a skateboard.\n"
+       << "<O<-<|8\n";
+}
 #endif
