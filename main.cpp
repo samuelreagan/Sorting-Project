@@ -27,61 +27,100 @@
 #include <iomanip>
     using std::setw;
     using std::setfill;
+#include <map>
+#include <vector>
 #include "Sorting.h"
+#include "Menu.h"
 
-int menu();
 void print(int arr[], int size);
-void fill_arrays(int random[], int ascend[], int reverse[], int size);
-void printMenu(int subMenu);
-void sort(int size, string sortType, string sortOrder);
-/** Array Sizes -- Commented the others out b/c of compilation warning */
-const int TEST_ONE   = 100; 
-//const int TEST_TWO   = 1000; 
-//const int TEST_THREE = 10000; 
-//const int TEST_FOUR  = 30000; 
+void fill_arrays(int random[], int ascend[], int descending[], int size);
+void create_csv(string file_name);
+void benchmarks(int(*funct)(int[],int), string sort_name);
+double sort_time(int(*func_ptr)(int [], int),int array[], int size, double& count);
+void write_to_csv(double arr[], string filename, string sort_name);
+const int NUM_SORTS   = 8;
+const int NUM_ARRAYS  = 12;
+const int NUM_TESTS   = 4;
+const int NUM_FILES   = 2;
 
-//This is not how main will look, this is just to test the sorts
+
 int main() { 
+    /** Create CSV Files */
+    create_csv("num_comparisons.csv");
+    create_csv("times.csv");
 
-    /******************MENU******************/
-    menu();
+    /** Benchmark Sorts */
+    string sort_names[NUM_SORTS] = {"selection", "bubble", "insertion", "modified insertion", "quick", "randomized quick", "merge", "heap"};
+    std::vector<int(*)(int[],int)> sorting_functions = {&selection_sort,&bubble_sort,&insertion_sort,&binary_insertion_sort,&quick_sort,&random_quick_sort,&merge_sort,&heap_sort};
+    
+    for(int i = 0; i < NUM_SORTS; i++) {
+        benchmarks(sorting_functions[i], sort_names[i]);
+    }
 
-    /****************END MENU****************/
-    /*
-    // Declare Test Arrays
-    int* random_1  = new int[size];
-    int* ascend_1  = new int[size];
-    int* reverse_1 = new int[size];
-
-    //Fill Arrays
-    fill_arrays(random_1, ascend_1, reverse_1, size);
-
-    //Print Arrays Before sorting
-    cout << "Before Sorting: ";
-    cout << "\nRandom:";
-    print(random_1, size);
-    cout << "\nAscending: ";
-    print(ascend_1, size);
-    cout << "\nReverse: ";
-    print(reverse_1, size);
-    cout << endl << endl;
-
-    //Sort Arrays
-    binary_insertion_sort(random_1, size);
-    binary_insertion_sort(ascend_1, size);
-    binary_insertion_sort(reverse_1, size);
-
-    //Print Arrays
-    cout << "After Sorting: ";
-    cout << "\nRandom: ";
-    print(random_1, size);
-    cout << "\nAscending: ";
-    print(ascend_1, size);
-    cout << "\nReverse: ";
-    print(reverse_1, size);
-    cout << endl << endl;
-    */
     return 0;
+}
+
+void write_to_csv(double arr[], string filename, string sort_name) {
+    ofstream fout(filename, std::ios::out | std::ios::app);
+    if(fout.is_open()) {
+        fout << sort_name << ",";
+        for(int i = 0; i < NUM_ARRAYS; i++) {
+            fout << arr[i];
+            if(i < NUM_ARRAYS - 1) {
+                fout << ",";
+            } else {
+                fout << endl;
+            }
+        }
+    }
+}
+
+void benchmarks(int(*funct)(int[],int), string sort_name) {
+    double times[NUM_ARRAYS];
+    double comps[NUM_ARRAYS];
+    int sizes[NUM_TESTS] = {100,1000,10000,30000};
+    
+    /** Run Benchmarks for Each of the Array Sizes */
+    for(int j = 0; j < NUM_TESTS; j++) {
+        int* random       = new int[sizes[j]];
+        int* ascending    = new int[sizes[j]];
+        int* descending    = new int[sizes[j]];
+        fill_arrays(random, ascending, descending, sizes[j]);
+
+        times[j*3] = sort_time(funct, ascending, sizes[j],comps[j*3]);
+        times[j*3+1] = sort_time(funct, descending, sizes[j],comps[j*3+1]);
+        times[j*3+2] = sort_time(funct, random, sizes[j], comps[j*3+2]);
+    }
+
+    /** Printing Data --- Test*/
+    for(int i = 0; i < 12; i++) {
+        cout << "Times: " << std::setprecision(10) << times[i] << endl;
+        cout << "Comparisons: " << std::setprecision(10) << comps[i] << endl;
+    }
+
+    /** Write Data to CSV */
+    write_to_csv(comps, "num_comparisons.csv", sort_name);
+    write_to_csv(times, "times.csv", sort_name);
+}
+
+/**
+* The function times a sort function
+* 
+* @param func_ptr pointer to the fuction being tested
+* @param array array being tested
+* @param size size of the array being tested 
+* @param count the number of comparisons
+*/
+double sort_time(int(*func_ptr)(int [], int),int array[], int size, double& count){
+    std::chrono::high_resolution_clock::time_point begin, end;
+    std::chrono::duration<double> elapsed_time;
+
+    begin = std::chrono::high_resolution_clock::now();
+    count = (double)func_ptr(array, size);
+    end = std::chrono::high_resolution_clock::now();
+
+    elapsed_time = end - begin;
+    return elapsed_time.count();
 }
 
 /** Test Function to Test Sorting Algoithms */
@@ -107,205 +146,31 @@ void print(int arr[], int size) {
  * @param size             The size of the arrays.
  *
  */
-void fill_arrays(int random[], int ascend[], int decending[], int size) {
+void fill_arrays(int random[], int ascend[], int descending[], int size) {
     for(int i = 0; i < size; i++) {
         random[i]  = rand() % 1000;
         ascend[i]  = i;
-        decending[i] = size - i;
+        descending[i] = size - i;
     }
 }
 
-void printMenu(int subMenu){
-    cout << setw(15) << setfill('-'); 
-    cout << subMenu;
-    cout << setw(15) << setfill('-') << "";
-    cout << endl;
-    switch (subMenu){
-        case 1:{
-            cout << "1) Run a specific sort\n"
-                 << "2) Run all sorts\n"; 
+/*
+ * @brief This function creates a csv file and writes the
+ * header info to the file.
+ *
+ *  @param file_name The name of the csv file.
+ *
+ */
+void create_csv(string file_name) {
+    ofstream fout(file_name, std::ios::out);
+    if (fout.is_open()) {
+        fout << "Array Size" << ",," << "100" << ",,," << "1000" 
+             << ",,," << "10000" << ",,," << "30000" << endl;
+        fout << "Array Type";
+        for(int i = 0; i < 4; i++) {
+            fout << ",inc,dec,ran";
         }
-        break;
-        case 2:{
-            cout << "1) Selection Sort\n"
-                 << "2) Bubble Sort\n"
-                 << "3) Insertion Sort\n"
-                 << "4) Modified Insertion Sort\n"
-                 << "5) Merge Sort\n"
-                 << "6) Quick Sort\n"
-                 << "7) Randomized Quick Sort\n"
-                 << "8) Heap Sort\n";
-        }
-        break;
-        case 3:{
-            cout << "Input size of testing array: ";
-        }
-        break;
-        case 4:{
-            cout << "Select Array type\n"
-                 << "1) Random Order\n"
-                 << "2) Ascending Order\n"
-                 << "3) Decending Order\n"
-                 << "4) All\n";
-
-        }
-        break;
-        default:{
-            cout << "Exiting...\n";
-        }
-        break;
+        fout << endl;
     }
-}
-
-int menu(){
-    int subMenu = 1;
-    int selection = 1;
-    string sortType = "all";
-    string sortOrder;
-    int size;
-
-    while(selection){
-        system("clear");
-        printMenu(subMenu);
-        if(subMenu == 3){
-            cin >> size; 
-        }
-        else{
-            cin >> selection;
-        }
-        switch (subMenu){
-            case 1:{
-                switch (selection){
-                    case 1:subMenu = 2;
-                    break;
-                    case 2:subMenu = 3;
-                    break;
-                }
-            }
-            break;
-            case 2:{
-                switch (selection){
-                    case 1: sortType = "selection_sort";
-                    case 2: sortType = "bubble_sort";
-                    case 3: sortType = "insertion_sort";
-                    case 4: sortType = "binary_insertion_sort";
-                    case 5: sortType = "merge_sort";
-                    case 6: sortType = "quick_sort";
-                    case 7: sortType = "random_quick_sort";
-                    case 8: sortType = "heap_sort";
-                }
-                subMenu = 3;
-            }
-            break;
-            case 3:{
-                subMenu = 4;
-            }
-            break;
-            case 4:{
-                switch (selection){
-                    case 1: sortOrder = "random";
-                    case 2: sortOrder = "ascending";
-                    case 3: sortOrder = "decending";
-                    case 4: sortOrder = "all";
-                }
-                subMenu = 0;
-                selection = 0;
-                sort(size,sortType,sortOrder);
-            }
-            break;
-            default: exit(0);
-        }
-    }
-    return size;   
-}
-void sort(int size, string sortType, string sortOrder){
-    void (*sort_func)(int[],int);
-    int* random     = new int[size];
-    int* ascending  = new int[size];
-    int* decending    = new int[size];
-    fill_arrays(random, ascending, decending, size);
-    //Determine Sort Types
-    if(sortType == "selection_sort"){
-        sort_func = &selection_sort;
-    }
-    else if(sortType == "bubble_sort"){
-        sort_func = &bubble_sort;
-    }
-    else if(sortType == "insertion_sort"){
-        sort_func = &insertion_sort;
-    }
-    else if(sortType == "binary_insertion_sort"){
-        sort_func = &binary_insertion_sort;
-    }
-    else if(sortType == "merge_sort"){
-        sort_func = &merge_sort;
-    }
-    else if(sortType == "quick_sort"){
-        sort_func = &quick_sort;
-    }
-    else if(sortType == "random_quick_sort"){
-        sort_func = &random_quick_sort;
-    }
-    else if(sortType == "heap_sort"){
-        sort_func = &heap_sort;
-    }
-    else{ //sortType = "all"
-        sort_func = &all_sorts;
-    }
-
-    //Determine Sorting Order
-    if(sortOrder == "random"){
-        cout << "Before Sorting: ";
-        cout << "\nRandom:";
-        print(random, size);
-        (*sort_func)(random,size);
-        cout << "After Sorting: ";
-        cout << "\nRandom:";
-        print(random, size);
-    }
-    else if(sortOrder == "ascending"){
-        cout << "Before Sorting: ";
-        cout << "\nAscending: ";
-        print(ascending, size);
-        (*sort_func)(ascending,size);
-        cout << "After Sorting: ";
-        cout << "\nAscending: ";
-        print(ascending, size);
-    }
-    else if(sortOrder == "decending"){
-        cout << "Before Sorting: ";
-        cout << "\nDecending: ";
-        print(decending, size);
-        (*sort_func)(decending,size);
-        cout << "After Sorting: ";
-        cout << "\nDecending: ";
-        print(decending, size);
-    }
-    else{ //sortOrder = "all"
-        cout << "Before Sorting: ";
-        cout << "\nRandom:";
-        print(random, size);
-        (*sort_func)(random,size);
-        cout << "After Sorting: ";
-        cout << "\nRandom:";
-        print(random, size);
-
-        cout << "Before Sorting: ";
-        cout << "\nAscending: ";
-        print(ascending, size);
-        (*sort_func)(ascending,size);
-        cout << "After Sorting: ";
-        cout << "\nAscending: ";
-        print(ascending, size);
-
-        cout << "Before Sorting: ";
-        cout << "\nDecending: ";
-        print(decending, size);
-        (*sort_func)(decending,size);
-        cout << "After Sorting: ";
-        cout << "\nDecending: ";
-        print(decending, size);
-    }
-
-    //menu();
+    fout.close();
 }
