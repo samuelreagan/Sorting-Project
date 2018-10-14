@@ -38,6 +38,8 @@
  * @param arr    The array that contains the data.
  * @param size   The size of the array.
  *
+ * @return The number of comparisons made.
+ *
  */
 int selection_sort  (int arr[], int size) {
   int count = 0;
@@ -67,6 +69,7 @@ int selection_sort  (int arr[], int size) {
  * @param arr    The array that contains the data.
  * @param size   The size of the array.
  *
+ * @return The number of comparisons made.
  */
 int bubble_sort(int arr[], int size) {
   int comps = 0;
@@ -96,6 +99,7 @@ int bubble_sort(int arr[], int size) {
  * @param arr    The array that contains the data.
  * @param size   The size of the array.
  *
+ * @return The number of comparisons made.
  */
 int insertion_sort (int arr[], int size) {
   int count = 0;
@@ -117,6 +121,7 @@ int insertion_sort (int arr[], int size) {
  * @param arr    The array that contains the data.
  * @param size   The size of the array.
  *
+ * @return The number of comparisons made.
  */
 int binary_insertion_sort(int arr[], int size) {
   int count = 0;
@@ -150,6 +155,8 @@ int binary_insertion_sort(int arr[], int size) {
  * @param arr[in/out]             The array that containst the values to be merged.
  * @param first                   The first index of an array.
  * @param last                    The last index of an array.
+ *
+ * @return The number of comparisons made.
  */
 int merge(int arr[], int first, int last) {
   int count = 0;
@@ -198,6 +205,8 @@ int merge(int arr[], int first, int last) {
  * @param arr[in/out]             The array to be sorted.
  * @param first                   The first index of an array.
  * @param last                    The last index of an array.
+ *
+ * @return The number of comparisons made.
  */
 int merge_sort(int arr[], int first, int last) {
   int count = 0;
@@ -217,6 +226,8 @@ int merge_sort(int arr[], int first, int last) {
  *
  * @param arr[in/out]             The array to be sorted.
  * @param size                    The size of the array.
+ *
+ * @return The number of comparisons made.
  */
 int merge_sort(int arr[], int size) {
   int count = merge_sort(arr, 0, size - 1);
@@ -274,6 +285,8 @@ void quick_sort(int arr[], int left_index, int right_index, int& count) {
  *
  * @param arr[in/out]             The array to be partioned.
  * @param size                    The size of the array.
+ *
+ * @return The number of comparisons made.
  */
 int quick_sort(int arr[], int size) {
   int count = 0;
@@ -306,6 +319,8 @@ void random_quick_sort(int arr[], int left_index, int right_index, int& count) {
  *
  * @param arr[in/out]             The array to be partioned.
  * @param size                    The size of the array.
+ *
+ * @return The number of comparisons made.
  */
 int random_quick_sort(int arr[], int size) {
   int count = 0;
@@ -430,6 +445,8 @@ void make_max_heap_bottom_up(int arr[], int size, int& count){
  *
  * @param arr[in/out]           The array to be partioned.
  * @param size                  The size of the array.
+ *
+ * @return The number of comparisons made.
  */
 int heap_sort(int arr[], int size){
   int count = 0;
