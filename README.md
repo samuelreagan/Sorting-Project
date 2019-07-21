@@ -1,5 +1,5 @@
 # Sorting-Project
-This project was created to analyze the performance of various sorting algorithms using C++. Each of the algorithms run time and total comparisons is gathered when ran on arrays of various sizes in random, ascending, and descending order. The number of comparisons and the run times are each exported into their own spreadsheets to be better analyzed. The sorting algorithms analyzed include:
+This project was created to analyze the performance of various sorting algorithms using C++. Each of the algorithm's run time and total comparisons is gathered when ran on arrays of various sizes in random, ascending, and descending order. The number of comparisons and the run times are each exported into their own spreadsheets to be better analyzed. The sorting algorithms analyzed include:
 - Selection Sort
 - Bubble Sort
 - Insertion Sort
